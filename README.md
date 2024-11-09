@@ -1,4 +1,3 @@
-Este índice no debería usarse como una principal razón de compra; es solamente un indicador que, en conjunto con otros indicadores, puede ayudar en la toma de decisiones financieras. El índice combina distintos indicadores para crear un índice de sentimiento para la Bolsa Mexicana de Valores. Se utiliza un modelo de machine learning para evaluar el sentimiento en noticias y redes sociales.
 
 1. Volatilidad 25%
 Se calcula la volatilidad del IPC (^MXX), que mide las fluctuaciones en el mercado bursátil mexicano. Una mayor volatilidad puede indicar miedo en el mercado, mientras que una menor volatilidad puede sugerir confianza o avaricia.

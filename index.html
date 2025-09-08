@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Wrap the chart and news section in a flex container -->
+    <div class = "chart-news-container">
+        <div class="chart">
+            {{ graph_html|safe }}
+        </div>
+        
+        <div id="news-container" class="news-container">
+            {% if news_list %}
+                <ul>    
+                    {% for news in news_list %}
+                        <li class="news-item">
+                            <span class="news-date">{{ news['Date'] }}</span>: {{ news['title'] }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No hay noticias disponibles.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- The info bar should be at the end of the body content -->
+    <div class="info">
+        <h1></h1>
+        <p>
+            Este índice no debería usarse como una principal razón de compra;
+            es solamente un indicador que, en conjunto con otros indicadores, 
+            puede ayudar en la toma de decisiones financieras.
+
+            El índice combina distintos indicadores para crear un índice de sentimiento para 
+            la Bolsa Mexicana de Valores. Se utiliza un modelo de machine learning 
+            para evaluar el sentimiento en noticias y redes sociales.
+        </p>
+    </div>
+    <div class = "info">
+        <h1 class = "infoTitles">1. Volatilidad 25%</h1>
+        <p>Se calcula la volatilidad del IPC (^MXX), que mide las fluctuaciones en el mercado bursátil mexicano.
+             Una mayor volatilidad puede indicar miedo en el mercado, 
+             mientras que una menor volatilidad puede sugerir confianza o avaricia.
+
+        </p>
+    </div>
+    <div class = "info">
+        <h1 class = "infoTitles">2. Noticias 20%</h1>
+        <p>
+            Se obtienen las últimas noticias a través de Google RSS. Las noticias se limpian y se analizan con el modelo
+             de sentimiento para asignarles un valor entre 0 y 1, donde 0 indica sentimiento negativo (miedo) y 1 indica 
+             sentimiento positivo (avaricia).
+
+        </p>
+    </div>
+    <div class = "info">
+        <h1 class = "infoTitles">3. Redes sociales 20%</h1>
+        <p>
+            Se utiliza la red social Reddit para poder conseguir últimos posts en varios subreddits mexicanos sobre finanzas
+             con ciertas palabras claves para obtener los últimos posts recientes. Estos posts pasan igualmente por el modelo 
+             de sentimiento y se les asigna un valor de entre 0 y 1.
+        </p>
+    </div>
+    <div class = "info">
+        <h1 class = "infoTitles">4. Google Trends 10%</h1>
+        <p>
+            Se utilizan varias palabras clave de búsquedas en google y se calcula cuando la cantidad de búsquedas
+             de ese tema tuvo un incremento significante en búsquedas. Por ejemplo un incremento de 200% de un dia 
+             a otro con el tema de ‘comprar acciones’ puede ser considerado una señal de avaricia en el mercado.
+        </p>
+    </div>
+    <div class = "info">
+        <h1 class = "infoTitles">5. Momentum/Volumen 25%</h1>
+        <p>Se analizan el momentum y el volumen de transacciones en el mercado para evaluar la fuerza y dirección 
+            de las tendencias actuales. Se comparan los volúmenes y el momentum actuales con los promedios de 30 y 
+            90 días para detectar desviaciones significativas. Un aumento sustancial puede indicar avaricia, mientras 
+            que una disminución puede señalar miedo entre los inversores.
+        </p>
+    </div>
+
+</body>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-container">  
+    <!-- Redes Sociales -->
+    <div class="footer-section social">
+      <h4>Github Repository:</h4>
+      <a href="https://github.com/Julrc/MarketSentimentBMV/tree/main" target="_blank" class="social-icon">
+        <img src="ruta/a/icono-github.png" alt="GitHub">
+      </a>
+    </div>
+    
+  </div>
+  
+  <!-- Créditos y Derechos de Autor -->
+  <div class="footer-bottom">
+
+  </div>
+</footer>
+
+
+</html>

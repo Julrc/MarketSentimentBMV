@@ -8,7 +8,7 @@ app = Flask(__name__)
 def index():
     try:
         # Load the Sentiment Index data
-        sentiment_data = pd.read_csv('sentiment_index.csv')
+        sentiment_data = pd.read_csv('data/sentiment_index.csv')
         sentiment_data['Date'] = pd.to_datetime(sentiment_data['Date'])
 
         # Generate the sentiment plot

@@ -1,19 +1,5 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.4
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
-# +
 import pandas as pd
+from pathlib import Path
 import numpy as np
 import yfinance as yf
 import requests
@@ -42,7 +28,6 @@ stop_words = set(stopwords.words('spanish'))
 
 # Arreglar google trends, reddit scores.
 
-# +
 end_date = datetime.today()
 
 start_date = end_date - timedelta(days=720)
@@ -57,8 +42,6 @@ ipc = yf.download('^MXX', start=start_date_str, end=end_date_str, interval='1d')
 ipc.reset_index(inplace=True)
 ipc['Date'] = pd.to_datetime(ipc['Date'])
 
-
-# +
 def get_google_news_rss_feed(feed_url):
     feed = feedparser.parse(feed_url)
     if feed.bozo:
@@ -79,7 +62,7 @@ def get_google_news_rss_feed(feed_url):
         })
     return articles
 
-# Collect news articles
+# news articles
 bolsa_rss_url = "https://news.google.com/rss/search?q=Bolsa+Mexicana+de+Valores&hl=es-419&gl=MX&ceid=MX:es-419"
 news_articles = get_google_news_rss_feed(bolsa_rss_url)
 if news_articles:
@@ -97,21 +80,20 @@ def preprocess_text(text, stop_words):
     tokens = [word for word in tokens if word not in stop_words]
     return ' '.join(tokens)
 
-#sentiment analysis model
+# BERT non-fin
 model_name = "nlptown/bert-base-multilingual-uncased-sentiment"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForSequenceClassification.from_pretrained(model_name)
 sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
-
 def get_sentiment_score(text):
     if not text:
         return 0.0
     try:
-        result = sentiment_pipeline(text[:512])[0]  # Truncate text to 512 tokens
+        result = sentiment_pipeline(text[:512])[0]  # Truncate txt to 512 tokens
         label = result['label']
         score = int(label.split()[0])  # Extract the number from '1 star', '2 stars', etc.
-        normalized_score = (score - 3) / 2  # Normalize to range [-1, 1]
+        normalized_score = (score - 3) / 2 
         return normalized_score
     except Exception as e:
         print(f"Error processing text: {e}")
@@ -133,9 +115,6 @@ news_df[desired_columns].to_csv('news_titles.csv', index=False)
 
 print("Date and titles have been saved to 'news_titles.csv'.")
 
-# +
-
-#Reddit API
 reddit = praw.Reddit(
     client_id="fbtWruG8aopQ5chxNLpURw",
     client_secret="hGgoXi6sA0Qv0wgAezpdXqGvOgc_1Q",
@@ -161,9 +140,7 @@ subreddits = ['MexicoBursatil', 'MexicoFinanciero']
 query = 'Acciones' , 'comprar', 'vender'
 reddit_posts = get_reddit_posts(subreddits, query)
 
-# +
 
-# reddit posts to DataFrame
 reddit_df = pd.DataFrame(reddit_posts)
 
 reddit_df['Date'] = reddit_df['created'].dt.normalize()
@@ -186,7 +163,6 @@ def get_google_trends_data(keywords, timeframe='today 1-m'):
 
 keywords = ['BMV', 'inversiones', 'Acciones', 'comprar acciones']
 trends_data = get_google_trends_data(keywords)
-# -
 
 # Verificar si se obtuvieron datos
 if trends_data.empty:
@@ -202,7 +178,7 @@ else:
     for keyword in keywords:
         trends_data[f'{keyword}_pct_change'] = trends_data[keyword].pct_change() * 100
 
-    # Definir cambios significativos
+    # solo cambios significativos
     significant_threshold = 51
 
     # Crear columnas que indiquen si hubo un aumento significativo
@@ -222,16 +198,14 @@ trends_data.rename(columns={'date': 'Date'}, inplace=True)
 
 trends_daily = trends_data[['Date', 'Google_Trends_Significant_Increase']]
 
-#Aggregate News Sentiment by Date
+# Agg by date
 news_daily_sentiment = news_df.groupby('Date')['sentiment_score'].mean().reset_index()
 print(news_daily_sentiment)
 
-#Aggregate Reddit Sentiment by Date
 reddit_daily_sentiment = reddit_df.groupby('Date')['sentiment_score'].mean().reset_index()
 print(reddit_daily_sentiment)
 
 
-# +
 #Volatility
 ipc = yf.download('^MXX', start=start_date_str, end=end_date_str, interval='1d')
 ipc.reset_index(inplace=True)
@@ -247,7 +221,6 @@ ipc['Volatility'].fillna(default_volatility, inplace=True)
 print("ipc shape:", ipc.shape)
 print(ipc[['Date', 'Volatility']].head())
 
-# +
 # Merge News and Reddit sentiment
 sentiment_data = pd.merge(
     news_daily_sentiment,
@@ -272,7 +245,6 @@ sentiment_data.dropna(inplace=True)
 ipc_sentiment = pd.merge(sentiment_data, ipc[['Date', 'Volatility']], on='Date', how='left')
 ipc_sentiment.dropna(inplace=True)
 
-# +
 
 ipc['Returns'] = ipc['Close'].pct_change()
 
@@ -316,8 +288,6 @@ ipc_sentiment['Volatility_inv'] = 1 / ipc_sentiment['Volatility']
 ipc_sentiment.replace([np.inf, -np.inf], np.nan, inplace=True)
 ipc_sentiment['Volatility_inv'].fillna(ipc_sentiment['Volatility_inv'].mean(), inplace=True)
 
-
-# +
 features_to_normalize = [
     'sentiment_score_news',
     'sentiment_score_reddit',
@@ -340,7 +310,6 @@ ipc_sentiment_scaled[features_to_normalize] = scaler.fit_transform(
 
 print(ipc_sentiment_scaled)
 
-# +
 weights = {
     'sentiment_score_news': 0.2,
     'sentiment_score_reddit': 0.2,
@@ -382,19 +351,18 @@ ipc_sentiment_scaled['Sentiment_Index'] = ipc_sentiment_scaled.apply(calculate_s
 
 ipc_sentiment_scaled.reset_index(inplace=True)
 
-# DataFrame with  'Date' and 'Sentiment_Index' csv
+# df with  'Date' and 'Sentiment_Index' csv
 sentiment_index_df = ipc_sentiment_scaled[['Date', 'Sentiment_Index']]
 
 today = datetime.now()
 
-# Calculate the date one year ago
 one_year_ago = today - timedelta(days=673)
 
-# Filter the DataFrame for dates within the past year
+# Filter DataFrame for dates within the past year
 sentiment_index_df = sentiment_index_df[sentiment_index_df['Date'] >= one_year_ago]
 
-# Optional: Reset index if desired
-sentiment_index_df.reset_index(drop=True, inplace=True)
+DATA_DIR = Path(__file__).with_suffix('').parent / "data"
+DATA_DIR.mkdir(exist_ok=True)          # creates data/ if it doesn’t exist
 
-sentiment_index_df.to_csv('sentiment_index.csv', index=False)
-
+sentiment_index_df.to_csv(DATA_DIR / "sentiment_index.csv", index=False)
+news_df[desired_columns].to_csv(DATA_DIR / "news_titles.csv", index=False)

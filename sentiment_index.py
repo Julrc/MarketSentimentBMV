@@ -18,6 +18,9 @@ import matplotlib.dates as mdates
 from scipy import interpolate
 import feedparser
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -116,9 +119,9 @@ news_df[desired_columns].to_csv('news_titles.csv', index=False)
 print("Date and titles have been saved to 'news_titles.csv'.")
 
 reddit = praw.Reddit(
-    client_id="fbtWruG8aopQ5chxNLpURw",
-    client_secret="hGgoXi6sA0Qv0wgAezpdXqGvOgc_1Q",
-    user_agent="marketsentimentbmv"
+    client_id="REDDIT_CLIENT_ID",
+    client_secret="REDDIT_CLIENT_SECRET",
+    user_agent="REDDIT_USER_AGENT"
 )
 
 reddit.read_only = True

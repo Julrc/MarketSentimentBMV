@@ -13,3 +13,5 @@ Se utilizan varias palabras clave de búsquedas en google y se calcula cuando la
 
 5. Momentum/Volumen 25%
 Se analizan el momentum y el volumen de transacciones en el mercado para evaluar la fuerza y dirección de las tendencias actuales. Se comparan los volúmenes y el momentum actuales con los promedios de 30 y 90 días para detectar desviaciones significativas. Un aumento sustancial puede indicar avaricia, mientras que una disminución puede señalar miedo entre los inversores.
+
+https://julianrc43.pythonanywhere.com/ 
